@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  /* Cards */
+  .glass-card {
+    @apply bg-white border border-slate-100 shadow-sm transition-shadow;
+  }
+
+  /* Form Elements */
+  .field-label {
+    @apply block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2;
+  }
+  .field-input {
+    @apply w-full bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 rounded-xl px-4 py-2.5 transition-all outline-none placeholder:text-slate-400;
+  }
+  .field-icon {
+    @apply absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-bold py-2.5 px-5 rounded-xl transition-all active:scale-95 shadow-lg shadow-primary-500/25 disabled:opacity-70 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-5 rounded-xl border border-slate-200 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm;
+  }
+
+  /* Avatars */
+  .avatar-xs {
+    @apply w-6 h-6 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 text-primary-700 flex items-center justify-center font-black text-[9px] shadow-inner;
+  }
+  .avatar-sm {
+    @apply w-10 h-10 rounded-xl bg-gradient-to-br from-primary-100 to-primary-200 text-primary-700 flex items-center justify-center font-black text-sm shadow-inner;
+  }
+  .avatar-lg {
+    @apply w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 text-primary-700 flex items-center justify-center font-black text-lg shadow-inner;
+  }
+  .avatar-xl {
+    @apply w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-primary-100 to-primary-200 text-primary-700 flex items-center justify-center font-black text-2xl shadow-inner;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap;
+  }
+  .badge-green { @apply bg-emerald-50 text-emerald-700; }
+  .badge-orange { @apply bg-amber-50 text-amber-700; }
+  .badge-blue { @apply bg-blue-50 text-blue-700; }
+
+  /* Misc UI */
+  .divider {
+    @apply flex items-center text-[10px] text-slate-300 font-semibold uppercase tracking-widest before:flex-1 before:border-t before:border-slate-100 before:mr-4 after:flex-1 after:border-t after:border-slate-100 after:ml-4;
+  }
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-8deg); }
+  40% { transform: rotate(8deg); }
+  60% { transform: rotate(-4deg); }
+  80% { transform: rotate(4deg); }
+}
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Spinner */
+.spinner {
+  @apply w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin block;
+}
+
+/* Login Background */
+.login-bg {
+  @apply bg-slate-50 overflow-hidden relative;
+}
+.blob {
+  @apply absolute rounded-full mix-blend-multiply filter blur-3xl opacity-30;
+  animation: blob 7s infinite alternate;
+}
+.blob-1 { @apply top-0 -left-4 w-96 h-96 bg-primary-400; animation-delay: 0s; }
+.blob-2 { @apply top-0 -right-4 w-96 h-96 bg-violet-400; animation-delay: 2s; }
+.blob-3 { @apply -bottom-8 left-20 w-96 h-96 bg-emerald-400; animation-delay: 4s; }
+
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+/* Dashboard Banner */
+.welcome-banner {
+  @apply bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 shadow-2xl relative border border-white/5;
+}
+.banner-circle {
+  @apply absolute rounded-full bg-primary-500/10 blur-[80px];
+}
+.banner-circle-1 {
+  @apply w-80 h-80 -top-20 -right-20 bg-primary-500/20;
+}
+.banner-circle-2 {
+  @apply w-64 h-64 -bottom-20 -left-20 bg-violet-500/20;
+}
+.banner-circle-3 {
+  @apply w-32 h-32 top-10 left-1/2 bg-emerald-500/10;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── Global Dark Mode Overrides ── */
+html.dark body {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark .glass-card, html.dark .bg-white {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .field-input, html.dark select, html.dark textarea {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-900, html.dark .text-slate-800, html.dark .text-slate-700 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-600, html.dark .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .bg-slate-50, html.dark .bg-slate-100 {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html.dark .bg-slate-900, html.dark .bg-slate-800, html.dark .welcome-banner {
+  background-color: #334155 !important;
+}
+
+html.dark td, html.dark th {
+  border-color: #334155 !important;
+}
+
+html.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .divider::before, html.dark .divider::after {
+  border-color: #334155 !important;
+}

@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          String    // ADMIN, LECTURER, STUDENT
+  avatar        String?
+  department    String?
+  matricNumber  String?   @unique  // Students only
+  staffId       String?   @unique  // Lecturers only
+  joinDate      DateTime  @default(now())
+  
+  // Relations
+  projectsAsStudent  Project[] @relation("StudentProjects")
+  projectsAsLecturer Project[] @relation("LecturerProjects")
+  peerReviews        PeerReview[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+}
+
+model Project {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  category      String
+  semester      String
+  submittedAt   DateTime?
+  deadline      DateTime?
+  status        String    // PENDING, UNDER_REVIEW, GRADED
+  finalScore    Float?
+  tags          String?   // Comma-separated tags
+  fileUrl       String?   // Path to the student's submission file
+  
+  // The Binding Links
+  studentId     String
+  student       User      @relation("StudentProjects", fields: [studentId], references: [id])
+  
+  lecturerId    String?   // Nullable initially until Admin assigns a lecturer
+  lecturer      User?     @relation("LecturerProjects", fields: [lecturerId], references: [id])
+  
+  milestones    ProjectMilestone[]
+  scores        ProjectScore[]
+  peerReviews   PeerReview[]
+}
+
+model ProjectMilestone {
+  id            String    @id @default(cuid())
+  title         String
+  status        String    // PENDING, SUBMITTED, APPROVED
+  deadline      DateTime?
+  completedAt   DateTime?
+  submissionUrl String?
+  
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id])
+}
+
+model RubricTemplate {
+  id            String    @id @default(cuid())
+  title         String
+  department    String?
+  
+  criteria      RubricCriterion[]
+}
+
+model RubricCriterion {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  maxPoints     Int       @default(100)
+  weight        Float     // Percentage, e.g., 0.25 for 25%
+  
+  templateId    String
+  template      RubricTemplate @relation(fields: [templateId], references: [id])
+  
+  scores        ProjectScore[]
+}
+
+model ProjectScore {
+  id            String    @id @default(cuid())
+  score         Float
+  comment       String?
+  
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id])
+  criterionId   String
+  criterion     RubricCriterion @relation(fields: [criterionId], references: [id])
+  evaluatorId   String    // Usually the lecturer
+}
+
+model PeerReview {
+  id            String    @id @default(cuid())
+  score         Float
+  comment       String?
+  submittedAt   DateTime  @default(now())
+  
+  reviewerId    String
+  reviewer      User      @relation(fields: [reviewerId], references: [id])
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id])
+}
+
+model Notification {
+  id            String    @id @default(cuid())
+  type          String    // GRADE, DEADLINE, SUBMISSION, SYSTEM
+  message       String
+  linkUrl       String?
+  isRead        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  action        String    // GRADE_FINALIZED, USER_CREATED, LOGIN, etc.
+  target        String?   // Entity ID (e.g., project ID)
+  details       String?
+  timestamp     DateTime  @default(now())
+  
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+}
