@@ -109,7 +109,7 @@ export default function Dashboard() {
                  <CheckCircle2 size={48} />
                </div>
               <p className="text-[10px] text-sky-100/60 font-black uppercase tracking-[0.4em] mb-2">Academic Session</p>
-              <p className="text-3xl font-black bg-gradient-to-b from-white to-sky-200 bg-clip-text text-transparent">24 / 25</p>
+              <p className="text-3xl font-black bg-gradient-to-b from-white to-sky-200 bg-clip-text text-transparent">25 / 26</p>
               <div className="mt-4 pt-4 border-t border-white/5">
                 <p className="text-[10px] text-emerald-400 font-black flex items-center justify-center gap-2 uppercase tracking-widest">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" /> Connection Active
