@@ -45,10 +45,10 @@ model Project {
   
   // The Binding Links
   studentId     String
-  student       User      @relation("StudentProjects", fields: [studentId], references: [id])
+  student       User      @relation("StudentProjects", fields: [studentId], references: [id], onDelete: Cascade)
   
   lecturerId    String?   // Nullable initially until Admin assigns a lecturer
-  lecturer      User?     @relation("LecturerProjects", fields: [lecturerId], references: [id])
+  lecturer      User?     @relation("LecturerProjects", fields: [lecturerId], references: [id], onDelete: SetNull)
   
   milestones    ProjectMilestone[]
   scores        ProjectScore[]
@@ -64,7 +64,7 @@ model ProjectMilestone {
   submissionUrl String?
   
   projectId     String
-  project       Project   @relation(fields: [projectId], references: [id])
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model RubricTemplate {
@@ -83,7 +83,7 @@ model RubricCriterion {
   weight        Float     // Percentage, e.g., 0.25 for 25%
   
   templateId    String
-  template      RubricTemplate @relation(fields: [templateId], references: [id])
+  template      RubricTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
   
   scores        ProjectScore[]
 }
@@ -94,9 +94,9 @@ model ProjectScore {
   comment       String?
   
   projectId     String
-  project       Project   @relation(fields: [projectId], references: [id])
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   criterionId   String
-  criterion     RubricCriterion @relation(fields: [criterionId], references: [id])
+  criterion     RubricCriterion @relation(fields: [criterionId], references: [id], onDelete: Cascade)
   evaluatorId   String    // Usually the lecturer
 }
 
@@ -107,9 +107,9 @@ model PeerReview {
   submittedAt   DateTime  @default(now())
   
   reviewerId    String
-  reviewer      User      @relation(fields: [reviewerId], references: [id])
+  reviewer      User      @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
   projectId     String
-  project       Project   @relation(fields: [projectId], references: [id])
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
@@ -121,7 +121,7 @@ model Notification {
   createdAt     DateTime  @default(now())
   
   userId        String
-  user          User      @relation(fields: [userId], references: [id])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {
@@ -132,5 +132,5 @@ model AuditLog {
   timestamp     DateTime  @default(now())
   
   userId        String
-  user          User      @relation(fields: [userId], references: [id])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
