@@ -10,7 +10,7 @@ const ACTION_COLOR = {
 };
 
 export default function AdminAuditLog() {
-  const { auditLog, allUsers } = useApp();
+  const { auditLogs, allUsers } = useApp();
 
   return (
     <div className="space-y-4">
@@ -21,7 +21,7 @@ export default function AdminAuditLog() {
         </div>
         <button onClick={() => {
           const csv = ['Timestamp,User,Action,Target,Details'].concat(
-            auditLog.map(entry => {
+            auditLogs.map(entry => {
               const actor = allUsers.find(u => u.id === entry.userId);
               return `"${new Date(entry.timestamp).toISOString()}", "${actor?.name || entry.userId}", "${entry.action}", "${entry.target || ''}", "${entry.details || ''}"`;
             })
@@ -50,7 +50,7 @@ export default function AdminAuditLog() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {auditLog.map(entry => {
+              {auditLogs.map(entry => {
                 const actor = allUsers.find(u => u.id === entry.userId);
                 const ts = new Date(entry.timestamp);
                 return (
