@@ -104,6 +104,7 @@ function AppRouter() {
           <Route path="audit" element={<AdminAuditLog />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="grade/:projectId" element={<GradeForm />} />
         </Route>
 
         {/* ─── ACADEMIC PORTAL ─── */}

@@ -261,7 +261,11 @@ export default function ProjectsView() {
           return (
             <div
               key={p.id}
-              onClick={() => { setSelectedProjectId(p.id); navigate(`/app/grade/${p.id}`); }}
+              onClick={() => { 
+                setSelectedProjectId(p.id); 
+                const prefix = user?.role?.toLowerCase() === 'admin' ? '/admin' : '/app';
+                navigate(`${prefix}/grade/${p.id}`);
+              }}
               className="glass-card rounded-2xl p-5 hover:shadow-xl transition-all cursor-pointer group border border-slate-100 shadow-sm"
             >
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
