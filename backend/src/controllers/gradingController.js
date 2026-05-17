@@ -122,7 +122,7 @@ export const submitGrade = async (req, res) => {
         userId: updatedProject.studentId,
         type: 'GRADE',
         message: `Your project "${updatedProject.title}" has been graded.`,
-        linkUrl: `/projects/${projectId}`
+        linkUrl: `/app/student/projects`
       }
     });
     

@@ -131,27 +131,27 @@ export const AUDIT_LOG = [
 // ─── Grade Distribution Buckets ──────────────────────────────────────────────
 export const getGradeLetter = (score) => {
   if (score === null || score === undefined) return 'N/A';
-  if (score >= 90) return 'A';
-  if (score >= 80) return 'B';
-  if (score >= 70) return 'C';
-  if (score >= 60) return 'D';
+  if (score >= 70) return 'A';
+  if (score >= 60) return 'B';
+  if (score >= 50) return 'C';
+  if (score >= 45) return 'D';
   return 'F';
 };
 
 export const getGradeColor = (score) => {
   if (score === null || score === undefined) return 'text-slate-400';
-  if (score >= 90) return 'text-emerald-600';
-  if (score >= 80) return 'text-blue-600';
-  if (score >= 70) return 'text-amber-600';
-  if (score >= 60) return 'text-orange-600';
+  if (score >= 70) return 'text-emerald-600';
+  if (score >= 60) return 'text-blue-600';
+  if (score >= 50) return 'text-amber-600';
+  if (score >= 45) return 'text-orange-600';
   return 'text-red-600';
 };
 
 export const getGradeBadgeClass = (score) => {
   if (score === null || score === undefined) return 'bg-slate-100 text-slate-500';
-  if (score >= 90) return 'bg-emerald-100 text-emerald-700';
-  if (score >= 80) return 'bg-blue-100 text-blue-700';
-  if (score >= 70) return 'bg-amber-100 text-amber-700';
-  if (score >= 60) return 'bg-orange-100 text-orange-700';
+  if (score >= 70) return 'bg-emerald-100 text-emerald-700';
+  if (score >= 60) return 'bg-blue-100 text-blue-700';
+  if (score >= 50) return 'bg-amber-100 text-amber-700';
+  if (score >= 45) return 'bg-orange-100 text-orange-700';
   return 'bg-red-100 text-red-700';
 };
