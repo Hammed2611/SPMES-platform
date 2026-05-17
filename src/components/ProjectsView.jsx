@@ -311,7 +311,7 @@ export default function ProjectsView() {
                 <div className="flex items-center gap-4 shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0">
                   {p.finalScore !== null ? (
                     <div className="text-right">
-                      <p className={`text-2xl font-black ${p.finalScore >= 80 ? 'text-emerald-600' : p.finalScore >= 60 ? 'text-amber-600' : 'text-red-500'}`}>
+                      <p className={`text-2xl font-black ${p.finalScore >= 70 ? 'text-emerald-600' : p.finalScore >= 60 ? 'text-blue-600' : p.finalScore >= 50 ? 'text-amber-600' : p.finalScore >= 45 ? 'text-orange-600' : 'text-red-500'}`}>
                         {p.finalScore.toFixed(1)}%
                       </p>
                       <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${getGradeBadgeClass(p.finalScore)}`}>
