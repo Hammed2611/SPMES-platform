@@ -49,7 +49,11 @@ export default function Notifications() {
               key={n.id}
               onClick={() => {
                 markNotificationRead(n.id);
-                if (n.linkUrl) navigate(n.linkUrl);
+                let url = n.linkUrl;
+                if (url && url.startsWith('/projects/')) {
+                  url = '/app/student/projects';
+                }
+                if (url) navigate(url);
               }}
               className={`glass-card rounded-2xl p-4 flex items-start gap-4 cursor-pointer transition-all hover:shadow-md ${
                 !n.read ? 'border-l-4 border-primary-500' : 'opacity-70'

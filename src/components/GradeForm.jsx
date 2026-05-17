@@ -29,8 +29,8 @@ function RubricCategory({ categoryKey, data, meta, onScoreChange, onCommentChang
   const suggestions = AI_SUGGESTIONS[categoryKey];
   const [showSugg, setShowSugg] = useState(false);
 
-  const scoreColor = data.score >= 80 ? 'text-emerald-600' : data.score >= 60 ? 'text-amber-600' : 'text-red-600';
-  const trackColor = data.score >= 80 ? 'accent-emerald-500' : data.score >= 60 ? 'accent-amber-500' : 'accent-red-500';
+  const scoreColor = data.score >= 70 ? 'text-emerald-600' : data.score >= 60 ? 'text-blue-600' : data.score >= 50 ? 'text-amber-600' : data.score >= 45 ? 'text-orange-600' : 'text-red-600';
+  const trackColor = data.score >= 70 ? 'accent-emerald-500' : data.score >= 60 ? 'accent-blue-500' : data.score >= 50 ? 'accent-amber-500' : data.score >= 45 ? 'accent-orange-500' : 'accent-red-500';
 
   return (
     <div className="glass-card rounded-2xl p-6 space-y-4">
@@ -69,7 +69,7 @@ function RubricCategory({ categoryKey, data, meta, onScoreChange, onCommentChang
       {readonly && (
         <div className="w-full bg-slate-100 rounded-full h-2">
           <div
-            className={`h-2 rounded-full transition-all ${data.score >= 80 ? 'bg-emerald-500' : data.score >= 60 ? 'bg-amber-500' : 'bg-red-500'}`}
+            className={`h-2 rounded-full transition-all ${data.score >= 70 ? 'bg-emerald-500' : data.score >= 60 ? 'bg-blue-500' : data.score >= 50 ? 'bg-amber-500' : data.score >= 45 ? 'bg-orange-500' : 'bg-red-500'}`}
             style={{ width: `${data.score}%` }}
           />
         </div>
@@ -78,7 +78,7 @@ function RubricCategory({ categoryKey, data, meta, onScoreChange, onCommentChang
       {/* Quick score buttons */}
       {!readonly && (
         <div className="flex gap-2 flex-wrap">
-          {[0, 50, 60, 70, 80, 90, 100].map(v => (
+          {[0, 40, 45, 50, 60, 70, 80, 90, 100].map(v => (
             <button
               key={v}
               onClick={() => onScoreChange(categoryKey, v)}
@@ -275,7 +275,7 @@ export default function GradeForm() {
           {/* Live score gauge */}
           <div className="score-gauge shrink-0">
             <div className="text-center">
-              <div className={`text-5xl font-black ${total >= 80 ? 'text-emerald-600' : total >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
+              <div className={`text-5xl font-black ${total >= 70 ? 'text-emerald-600' : total >= 60 ? 'text-blue-600' : total >= 50 ? 'text-amber-600' : total >= 45 ? 'text-orange-600' : 'text-red-600'}`}>
                 {total.toFixed(1)}%
               </div>
               <div className={`text-2xl font-black mt-1 px-4 py-1 rounded-xl ${badgeCls}`}>
@@ -351,7 +351,7 @@ export default function GradeForm() {
           })}
           <div className="pt-3 border-t border-slate-200 flex justify-between font-black text-lg">
             <span>Total Weighted Score</span>
-            <span className={`${total >= 80 ? 'text-emerald-600' : total >= 60 ? 'text-amber-600' : 'text-red-500'}`}>
+            <span className={`${total >= 70 ? 'text-emerald-600' : total >= 60 ? 'text-blue-600' : total >= 50 ? 'text-amber-600' : total >= 45 ? 'text-orange-600' : 'text-red-500'}`}>
               {total.toFixed(2)}%  ({gradeLetter})
             </span>
           </div>
