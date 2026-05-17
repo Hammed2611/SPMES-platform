@@ -5,11 +5,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import prisma from './config/prisma.js';
 
-// Load environment variables
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load environment variables from backend/.env explicitly
+dotenv.config({ path: path.join(__dirname, '../../backend/.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;

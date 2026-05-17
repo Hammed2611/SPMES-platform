@@ -71,6 +71,21 @@ export const markAsRead = async (req, res) => {
 };
 
 /**
+ * Mark all notifications as read
+ */
+export const markAllAsRead = async (req, res) => {
+  try {
+    await prisma.notification.updateMany({
+      where: { userId: req.user.id, isRead: false },
+      data: { isRead: true }
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error marking notifications' });
+  }
+};
+
+/**
  * Get system audit log (Admin only)
  */
 export const getAuditLogs = async (req, res) => {

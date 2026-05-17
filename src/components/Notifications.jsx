@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bell, CheckCheck, AlertCircle, Clock, Star, Monitor } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const TYPE_CONFIG = {
   grade:      { icon: Star,         color: 'text-amber-500',   bg: 'bg-amber-50' },
@@ -12,6 +13,7 @@ const TYPE_CONFIG = {
 
 export default function Notifications() {
   const { notifications, markNotificationRead, markAllRead } = useApp();
+  const navigate = useNavigate();
 
   const unread = notifications.filter(n => !n.read).length;
 
@@ -45,7 +47,10 @@ export default function Notifications() {
           return (
             <div
               key={n.id}
-              onClick={() => markNotificationRead(n.id)}
+              onClick={() => {
+                markNotificationRead(n.id);
+                if (n.linkUrl) navigate(n.linkUrl);
+              }}
               className={`glass-card rounded-2xl p-4 flex items-start gap-4 cursor-pointer transition-all hover:shadow-md ${
                 !n.read ? 'border-l-4 border-primary-500' : 'opacity-70'
               }`}

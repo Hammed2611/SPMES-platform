@@ -21,6 +21,7 @@ const NAV_ITEMS = {
     { id: 'dashboard',  label: 'Overview',        icon: LayoutDashboard },
     { id: 'users',      label: 'Users',           icon: Users },
     { id: 'projects',   label: 'All Projects',    icon: ClipboardList },
+    { id: 'assign',     label: 'Assign Lecturers', icon: Shield },
     { id: 'analytics',  label: 'Analytics',       icon: BarChart2 },
     { id: 'audit',      label: 'Audit Log',       icon: Shield },
   ],

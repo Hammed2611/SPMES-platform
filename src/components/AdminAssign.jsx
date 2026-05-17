@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE from '../config/api.js';
-import { Users, Link as LinkIcon, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, Link as LinkIcon, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function AdminAssign() {
@@ -40,7 +40,7 @@ export default function AdminAssign() {
       if (res.ok) {
         setUnassigned(prev => prev.filter(p => p.id !== selectedProject.id));
         setLecturers(prev => prev.map(l => 
-          l.id === lecturerId ? { ...l, workload: l.workload + 1 } : l
+          l.id === lecturerId ? { ...l, _count: { ...l._count, projectsAsLecturer: (l._count?.projectsAsLecturer || 0) + 1 } } : l
         ));
         setSelectedProject(null);
       } else {
@@ -140,9 +140,9 @@ export default function AdminAssign() {
                       {lecturer.department}
                     </span>
                     <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                      lecturer.workload > 6 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+                      (lecturer._count?.projectsAsLecturer || 0) > 6 ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
                     }`}>
-                      Workload: {lecturer.workload} projects
+                      Workload: {lecturer._count?.projectsAsLecturer || 0} projects
                     </span>
                   </div>
                 </div>
@@ -163,9 +163,3 @@ export default function AdminAssign() {
     </div>
   );
 }
-
-// Internal icon def
-const CheckCircle2 = ({ size, className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-);
-

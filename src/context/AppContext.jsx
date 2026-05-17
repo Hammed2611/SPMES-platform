@@ -97,7 +97,12 @@ export const AppProvider = ({ children }) => {
           if (aRes.ok) setAuditLogs(await aRes.json());
           
           if (nRes.ok) {
-            const nData = await nRes.json();
+            const rawData = await nRes.json();
+            const nData = rawData.map(n => ({
+              ...n,
+              read: n.isRead,
+              date: new Date(n.createdAt).toLocaleString()
+            }));
             setNotifications(nData);
             setUnreadCount(nData.filter(n => !n.read).length);
           }
@@ -110,7 +115,8 @@ export const AppProvider = ({ children }) => {
               try {
                 const { type, data } = JSON.parse(event.data);
                 if (type === 'NEW_NOTIFICATION') {
-                  setNotifications(prev => [data, ...prev]);
+                  const mappedData = { ...data, read: data.isRead, date: new Date(data.createdAt).toLocaleString() };
+                  setNotifications(prev => [mappedData, ...prev]);
                   setUnreadCount(c => c + 1);
                 }
               } catch (e) {}
@@ -130,7 +136,6 @@ export const AppProvider = ({ children }) => {
 
     return () => {
       if (sse) {
-        console.log('Cleaning up SSE connection');
         sse.close();
       }
     };
@@ -185,15 +190,22 @@ export const AppProvider = ({ children }) => {
 
   const getProjectsForUser = useCallback(() => {
     if (!user) return [];
-    if (user.role?.toUpperCase() === 'ADMIN') return projects;
+    const role = user.role?.toUpperCase();
+    if (role === 'ADMIN') return projects;
     return projects.filter(p => p.studentId === user.id || p.lecturerId === user.id);
   }, [user, projects]);
 
   const saveGrade = async (projectId, rubric, finalScore) => {
     try {
+      const scoresArray = Object.entries(rubric).map(([key, data]) => ({
+        name: RUBRIC_META_FOR_CONTEXT[key] || key,
+        score: data.score,
+        comment: data.comment
+      }));
+
       const res = await authFetch(`${API_BASE}/api/grading/${projectId}`, {
         method: 'POST',
-        body: JSON.stringify({ rubric, finalScore })
+        body: JSON.stringify({ scores: scoresArray, finalScore })
       });
       if (res.ok) {
         refreshProjects();
@@ -205,12 +217,22 @@ export const AppProvider = ({ children }) => {
     return false;
   };
 
-  const markNotificationsRead = async () => {
+  const markNotificationRead = async (id) => {
     try {
-      const res = await authFetch(`${API_BASE}/api/system/notifications/read`, { method: 'POST' });
+      const res = await authFetch(`${API_BASE}/api/system/notifications/${id}/read`, { method: 'PATCH' });
+      if (res.ok) {
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, isRead: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  const markAllRead = async () => {
+    try {
+      const res = await authFetch(`${API_BASE}/api/system/notifications/mark-all-read`, { method: 'PATCH' });
       if (res.ok) {
         setUnreadCount(0);
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setNotifications(prev => prev.map(n => ({ ...n, read: true, isRead: true })));
       }
     } catch (err) { console.error(err); }
   };
@@ -220,7 +242,7 @@ export const AppProvider = ({ children }) => {
       user, setUser, login, register, logout,
       projects, refreshProjects,
       allUsers, refreshUsers,
-      notifications, unreadCount, markNotificationsRead,
+      notifications, unreadCount, markNotificationRead, markAllRead,
       auditLogs,
       isAuthRestoring, isInitialDataLoading,
       sidebarOpen, setSidebarOpen,
@@ -230,6 +252,13 @@ export const AppProvider = ({ children }) => {
       {children}
     </AppContext.Provider>
   );
+};
+
+const RUBRIC_META_FOR_CONTEXT = {
+  innovation: 'Innovation & Creativity',
+  technical: 'Technical Execution',
+  presentation: 'Presentation & Communication',
+  documentation: 'Documentation & Report'
 };
 
 export const useApp = () => useContext(AppContext);

@@ -4,7 +4,7 @@ import {
   ArrowLeft, Save, CheckCircle2, AlertCircle,
   Star, MessageSquare, Target, Award, Lightbulb, FileText, Presentation, Download
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { getGradeLetter, getGradeBadgeClass, USERS } from '../data/mockData';
 import { downloadProjectPDF } from '../utils/reportGenerator';
@@ -141,27 +141,36 @@ function RubricCategory({ categoryKey, data, meta, onScoreChange, onCommentChang
 }
 
 export default function GradeForm() {
+  const { projectId } = useParams();
   const navigate = useNavigate();
-  const { projects, selectedProjectId, saveGrade, user, allUsers } = useApp();
-  const project = projects.find(p => p.id === selectedProjectId);
+  const { projects, setSelectedProjectId, user, allUsers, authFetch, saveGrade } = useApp();
+  const project = projects.find(p => p.id === projectId);
   const student = allUsers.find(u => u.id === project?.studentId);
 
-  const isReadonly = user?.role === 'student' || project?.status === 'graded';
+  const userRole = user?.role?.toUpperCase();
+  const projectStatus = project?.status?.toUpperCase();
+  const isReadonly = userRole === 'STUDENT' || (projectStatus === 'GRADED' && userRole !== 'ADMIN');
 
-  const [rubric, setRubric]     = useState(project?.rubric || {});
+  const [rubric, setRubric]     = useState(project?.rubric || {
+    innovation:    { score: 0, weight: 25, comment: '' },
+    technical:     { score: 0, weight: 40, comment: '' },
+    presentation:  { score: 0, weight: 20, comment: '' },
+    documentation: { score: 0, weight: 15, comment: '' },
+  });
   const [isSaved, setIsSaved]   = useState(false);
   const [activeTab, setActiveTab] = useState('rubric');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   useEffect(() => {
     if (project?.rubric) setRubric(project.rubric);
-  }, [project?.id]);
+    if (projectId) setSelectedProjectId(projectId);
+  }, [project?.id, projectId, setSelectedProjectId]);
 
   if (!project) return (
     <div className="flex flex-col items-center justify-center h-64 text-slate-400 gap-3">
       <AlertCircle size={40} className="opacity-30"/>
       <p>Project not found.</p>
-      <button onClick={() => navigate('/app/dashboard')} className="btn-secondary text-sm">← Go Back</button>
+      <button onClick={() => navigate(userRole === 'ADMIN' ? '/admin/projects' : '/app/dashboard')} className="btn-secondary text-sm">← Go Back</button>
     </div>
   );
 
@@ -179,21 +188,21 @@ export default function GradeForm() {
     setRubric(prev => ({ ...prev, [key]: { ...prev[key], comment: value } }));
 
   const handleGenerateAIFeedback = async () => {
+    console.log("Generating AI Feedback for project:", project.id);
     setIsGeneratingAI(true);
     try {
-      // Prepare scores with names matching seed data
       const scoresArray = Object.entries(rubric).map(([key, data]) => ({
-        name: key.charAt(0).toUpperCase() + key.slice(1),
+        name: RUBRIC_META[key].label,
         score: data.score,
         comment: data.comment
       }));
 
       const response = await authFetch(`${API_BASE}/api/grading/${project.id}/ai-feedback`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scores: scoresArray })
       });
       
+      console.log("AI Response status:", response.status);
       const data = await response.json();
       
       if (response.ok) {
@@ -205,27 +214,33 @@ export default function GradeForm() {
       }
     } catch (err) {
       console.error("AI Error:", err);
-      alert("Cannot connect to AI service.");
+      alert("Cannot connect to AI service. " + err.message);
     } finally {
       setIsGeneratingAI(false);
     }
   };
 
-  const handleSave = () => {
-    saveGrade(project.id, rubric, parseFloat(total.toFixed(2)));
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+  const handleSave = async () => {
+    const success = await saveGrade(project.id, rubric, parseFloat(total.toFixed(2)));
+    if (success) {
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+    } else {
+      alert("Failed to save grade. Please check your connection.");
+    }
   };
+
+  const tags = Array.isArray(project.tags) ? project.tags : project.tags?.split(',').filter(Boolean) || [];
 
   return (
     <div className="space-y-6">
       {/* Back */}
       <button
-        onClick={() => navigate('/app/dashboard')}
+        onClick={() => navigate(userRole === 'ADMIN' ? '/admin/projects' : '/app/dashboard')}
         className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors group text-sm"
       >
         <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-        Back to Dashboard
+        Back to {userRole === 'ADMIN' ? 'Projects' : 'Dashboard'}
       </button>
 
       {/* Hero header */}
@@ -236,7 +251,7 @@ export default function GradeForm() {
               <span className="text-xs font-bold text-primary-600 uppercase tracking-widest bg-primary-50 px-2 py-0.5 rounded">
                 {project.category}
               </span>
-              {project.tags?.map(t => (
+              {tags.map(t => (
                 <span key={t} className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-medium">{t}</span>
               ))}
             </div>
@@ -244,7 +259,7 @@ export default function GradeForm() {
             <p className="text-slate-500 text-sm mt-1">
               Student: <span className="font-bold text-slate-700">{student?.name}</span>
               <span className="text-slate-400 mx-2">·</span>
-              Submitted: {project.submittedAt}
+              Submitted: {project.submittedAt ? new Date(project.submittedAt).toLocaleDateString() : 'Pending'}
             </p>
             <p className="text-slate-500 text-sm mt-2 max-w-2xl">{project.description}</p>
             {project.fileUrl && (
@@ -269,7 +284,7 @@ export default function GradeForm() {
               <p className="text-xs text-slate-400 mt-1 mb-4">Weighted Score</p>
               
               <button 
-                onClick={() => downloadProjectPDF(project, student, { name: user.name })}
+                onClick={() => downloadProjectPDF(project, student, { name: user?.name })}
                 className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-primary-600 text-white text-xs font-bold rounded-xl hover:bg-primary-700 transition shadow-lg shadow-primary-500/20"
               >
                 <FileText size={14} /> Export Grade Report
@@ -280,63 +295,35 @@ export default function GradeForm() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
-        {['rubric', 'peer-reviews', 'overview'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-sm font-bold capitalize transition-all ${
-              activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {tab === 'peer-reviews' ? 'Peer Reviews' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
+      <div className="flex gap-1 bg-slate-200/50 p-1 rounded-2xl w-fit">
+        <button 
+          onClick={() => setActiveTab('rubric')}
+          className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${activeTab === 'rubric' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          Rubric Evaluation
+        </button>
+        <button 
+          onClick={() => setActiveTab('overview')}
+          className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${activeTab === 'overview' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          Score Overview
+        </button>
       </div>
 
       {/* Rubric Tab */}
       {activeTab === 'rubric' && (
-        <div className="space-y-4">
-          {Object.entries(rubric).map(([key, data]) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Object.entries(RUBRIC_META).map(([key, meta]) => (
             <RubricCategory
               key={key}
               categoryKey={key}
-              data={data}
-              meta={RUBRIC_META[key]}
+              data={rubric[key] || { score: 0, weight: 0, comment: '' }}
+              meta={meta}
               onScoreChange={handleScoreChange}
               onCommentChange={handleCommentChange}
               readonly={isReadonly}
             />
           ))}
-        </div>
-      )}
-
-      {/* Peer Reviews Tab */}
-      {activeTab === 'peer-reviews' && (
-        <div className="glass-card rounded-2xl p-6 space-y-4">
-          <h3 className="font-black text-slate-800">Peer Reviews</h3>
-          {project.peerReviews?.length === 0 ? (
-            <div className="text-center py-10 text-slate-400">
-              <Star size={36} className="mx-auto mb-2 opacity-20" />
-              <p>No peer reviews yet.</p>
-            </div>
-          ) : (
-            project.peerReviews.map((rev, i) => {
-              const reviewer = allUsers.find(u => u.id === rev.reviewerId);
-              return (
-                <div key={i} className="p-4 bg-slate-50 rounded-xl flex gap-4 items-start">
-                  <div className="avatar-sm shrink-0">{reviewer?.avatar || '?'}</div>
-                  <div>
-                    <p className="font-bold text-slate-800 text-sm">{reviewer?.name || 'Anonymous'}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{rev.comment}</p>
-                    <span className={`text-xs font-bold mt-2 inline-block px-2 py-0.5 rounded-full ${getGradeBadgeClass(rev.score)}`}>
-                      Score: {rev.score}%
-                    </span>
-                  </div>
-                </div>
-              );
-            })
-          )}
         </div>
       )}
 
@@ -350,7 +337,7 @@ export default function GradeForm() {
             return (
               <div key={key} className="space-y-1">
                 <div className="flex justify-between text-sm">
-                  <span className="font-semibold text-slate-700">{meta.label}</span>
+                  <span className="font-semibold text-slate-700">{meta?.label}</span>
                   <span className="font-bold text-slate-900">{data.score}/100 × {data.weight}% = <span className="text-primary-600">{contribution}pts</span></span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-2">
@@ -407,7 +394,7 @@ export default function GradeForm() {
         </div>
       )}
 
-      {isReadonly && project.status === 'graded' && (
+      {isReadonly && (projectStatus === 'GRADED') && (
         <div className="flex items-center gap-3 p-5 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700">
           <CheckCircle2 size={22} className="shrink-0" />
           <div>
@@ -419,4 +406,3 @@ export default function GradeForm() {
     </div>
   );
 }
-

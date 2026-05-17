@@ -48,7 +48,7 @@ export const getAssignmentMatrix = async (req, res) => {
     });
 
     const lecturers = await prisma.user.findMany({
-      where: { role: 'lecturer' },
+      where: { role: { in: ['lecturer', 'LECTURER'] } },
       select: { 
         id: true, 
         name: true, 
@@ -111,7 +111,7 @@ export const autoAssign = async (req, res) => {
     }
 
     const lecturers = await prisma.user.findMany({
-      where: { role: 'lecturer' },
+      where: { role: { in: ['lecturer', 'LECTURER'] } },
       select: { id: true, _count: { select: { projectsAsLecturer: true } } }
     });
 
